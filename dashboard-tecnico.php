@@ -385,33 +385,42 @@ $ticketsAsignados = obtenerTodos($sqlTicketsAsignados, array($userId));
                         </thead>
                         <tbody>
                             <?php foreach ($ticketsAsignados as $ticket): ?>
-                                <tr class="priority-<?php echo $ticket['prioridad']; ?> ticket-row" 
-                                    data-estado="<?php echo $ticket['estado']; ?>"
-                                    data-prioridad="<?php echo $ticket['prioridad']; ?>">
-                                    <td><strong style="color: var(--jira-blue);">#<?php echo $ticket['id']; ?></strong></td>
-                                    <td>
-                                        <a href="ver-ticket.php?id=<?php echo $ticket['id']; ?>" class="text-decoration-none" style="color: var(--text-primary); font-weight: 600;">
-                                            <?php echo e(substr($ticket['titulo'], 0, 40)) . (strlen($ticket['titulo']) > 40 ? '...' : ''); ?>
-                                        </a>
-                                    </td>
-                                    <td><?php echo e($ticket['usuario_nombre']); ?></td>
-                                    <td>
-                                        <?php 
-                                        echo $ticket['categoria_otro'] ? e($ticket['categoria_otro']) : e($ticket['categoria_nombre']);
-                                        ?>
-                                    </td>
-                                    <td><?php echo badgePrioridad($ticket['prioridad']); ?></td>
-                                    <td><?php echo badgeEstado($ticket['estado']); ?></td>
-                                    <td>
-                                        <small style="color: var(--text-muted);"><?php echo formatearFecha($ticket['created_at']); ?></small>
-                                    </td>
-                                    <td>
-                                        <a href="ver-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn btn-sm btn-primary">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+    <tr class="priority-<?php echo $ticket['prioridad']; ?> ticket-row" 
+        data-estado="<?php echo $ticket['estado']; ?>"
+        data-prioridad="<?php echo $ticket['prioridad']; ?>"
+        data-ticket-id="<?php echo $ticket['id']; ?>">
+        
+        <td><strong class="ticket-id-link">#<?php echo $ticket['id']; ?></strong></td>
+        
+        <td>
+            <a href="ver-ticket.php?id=<?php echo $ticket['id']; ?>" class="ticket-title-link">
+                <?php echo e(substr($ticket['titulo'], 0, 40)) . (strlen($ticket['titulo']) > 40 ? '...' : ''); ?>
+            </a>
+        </td>
+        
+        <td class="ticket-user"><?php echo e($ticket['usuario_nombre']); ?></td>
+        
+        <td class="ticket-category">
+            <?php 
+            echo $ticket['categoria_otro'] ? e($ticket['categoria_otro']) : e($ticket['categoria_nombre']);
+            ?>
+        </td>
+        
+        <td><?php echo badgePrioridad($ticket['prioridad']); ?></td>
+        
+        <td><?php echo badgeEstado($ticket['estado']); ?></td>
+        
+        <td>
+            <small class="ticket-date"><?php echo formatearFecha($ticket['created_at']); ?></small>
+        </td>
+        
+        <td class="text-center">
+            <a href="ver-ticket.php?id=<?php echo $ticket['id']; ?>" class="btn btn-sm btn-primary">
+                <i class="bi bi-eye"></i>
+            </a>
+        </td>
+    </tr>
+<?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
