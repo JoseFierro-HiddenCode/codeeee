@@ -557,5 +557,40 @@ function obtenerEquiposPorFolioCarta($folioCarta) {
     ";
     return obtenerTodos($sql, [$folioCarta]);
 }
+
+/**
+ * Verificar si un usuario es Gerente General
+ */
+function esGerenteGeneral($userId = null) {
+    if ($userId === null) {
+        $userId = $_SESSION['user_id'] ?? 0;
+    }
+    
+    $sql = "SELECT rol FROM users WHERE id = ?";
+    $result = obtenerUno($sql, [$userId]);
+    return ($result && $result['rol'] == 'gerente_general');
+}
+
+/**
+ * Verificar si un usuario puede aprobar solicitudes (cualquier gerente)
+ */
+function puedeAprobarSolicitudes($userId = null) {
+    if ($userId === null) {
+        $userId = $_SESSION['user_id'] ?? 0;
+    }
+    
+    $sql = "SELECT rol FROM users WHERE id = ?";
+    $result = obtenerUno($sql, [$userId]);
+    return ($result && in_array($result['rol'], ['gerente', 'gerente_general']));
+}
+
+/**
+ * Contar solicitudes pendientes de aprobación del Gerente General
+ */
+function contarSolicitudesPendientesGeneral() {
+    $sql = "SELECT COUNT(*) as total FROM solicitudes_equipos WHERE estado = 'pendiente_gerente_general'";
+    $result = obtenerUno($sql);
+    return $result['total'] ?? 0;
+}
 ?>
 
