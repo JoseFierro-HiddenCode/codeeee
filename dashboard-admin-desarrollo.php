@@ -4,7 +4,7 @@ require_once '../config/database.php';
 require_once '../includes/functions.php';
 
 protegerPagina(['admin_tecnico']);
-protegerPorEquipo('soporte'); // Solo equipo de soporte
+protegerPorEquipo('desarrollo'); 
 
 // EJECUTAR ARCHIVADO AUTOMÁTICO
 ejecutarArchivoSiNecesario();
@@ -20,7 +20,7 @@ $sqlStats = "
         SUM(CASE WHEN prioridad = 'urgente' AND estado != 'cerrado' THEN 1 ELSE 0 END) as urgentes
     FROM tickets
     WHERE archivado = 0
-      AND equipo_asignado = 'soporte'
+    AND equipo_asignado = 'desarrollo'
 ";
 $stats = obtenerUno($sqlStats);
 
@@ -40,7 +40,7 @@ $sqlTodosTickets = "
     LEFT JOIN sedes s ON u.sede_id = s.id
     LEFT JOIN areas a ON u.area_id = a.id
     WHERE t.archivado = 0
-    AND t.equipo_asignado = 'soporte'
+    AND t.equipo_asignado = 'desarrollo'
     ORDER BY 
         CASE t.estado 
             WHEN 'abierto' THEN 1 
@@ -59,7 +59,7 @@ $todosTickets = obtenerTodos($sqlTodosTickets);
 
 
 // Obtener técnicos para asignación
-$tecnicos = obtenerTecnicosPorEquipo('soporte');
+$tecnicos = obtenerTecnicosPorEquipo('desarrollo');
 
 
 // Tickets asignados AL ADMIN como técnico
@@ -77,7 +77,7 @@ $sqlMisTickets = "SELECT t.*,
     LEFT JOIN dbo.areas a ON u.area_id = a.id
     WHERE t.tecnico_asignado_id = ?
     AND t.archivado = 0
-    AND t.equipo_asignado = 'soporte'
+    AND t.equipo_asignado = 'desarrollo'
     ORDER BY
         CASE t.prioridad 
             WHEN 'urgente' THEN 1 
@@ -94,7 +94,7 @@ $misTicketsComoTecnico = obtenerTodos($sqlMisTickets, [$_SESSION['user_id']]);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Soporte - Sistema de Tickets</title>
+    <title>Dashboard Desarrollo - Sistema de Tickets</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="../public/css/style.css?v=<?php echo time(); ?>">
@@ -112,7 +112,7 @@ $misTicketsComoTecnico = obtenerTodos($sqlMisTickets, [$_SESSION['user_id']]);
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-        
+                   
                     <!-- Theme Toggle -->
                     <li class="nav-item">
                         <button class="theme-toggle" id="theme-toggle" title="Cambiar tema">
@@ -140,21 +140,19 @@ $misTicketsComoTecnico = obtenerTodos($sqlMisTickets, [$_SESSION['user_id']]);
     <div class="sidebar">
         <ul class="sidebar-nav">
             <li class="sidebar-nav-item">
-                <a href="dashboard-admin-soporte.php" class="sidebar-nav-link active">
+                <a href="dashboard-admin-desarrollo.php" class="sidebar-nav-link active">
                     <i class="bi bi-grid-fill"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
+
             <li class="sidebar-nav-item">
             <a href="crear-ticket.php" class="sidebar-nav-link">
             <i class="bi bi-plus-circle-fill"></i>
              <span>Nuevo Ticket</span>
              </a>
             </li>
-            
         </ul>
-
-        
         
         <div class="sidebar-section-title">Gestión</div>
         <ul class="sidebar-nav">
@@ -201,81 +199,6 @@ $misTicketsComoTecnico = obtenerTodos($sqlMisTickets, [$_SESSION['user_id']]);
                 </a>
             </li>
         </ul>
-
-        <!-- NEW SECTION INVENTARIO -->
-<div class="sidebar-section-title">Inventario</div>
-<ul class="sidebar-nav">
-    <li class="sidebar-nav-item">
-        <a href="inventario/dashboard-inventario.php" class="sidebar-nav-link">
-            <i class="bi bi-box-seam"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
-    <li class="sidebar-nav-item">
-        <a href="inventario/gestionar-equipos.php" class="sidebar-nav-link">
-            <i class="bi bi-laptop"></i>
-            <span>Gestionar Equipos</span>
-        </a>
-    </li>
-    <li class="sidebar-nav-item">
-        <a href="inventario/asignar-equipos-fisicos.php" class="sidebar-nav-link">
-            <i class="bi bi-clipboard-check"></i>
-            <span>Solicitudes Aprobadas</span>
-            <?php 
-            $solicitudesAprobadas = contarSolicitudesAprobadas();
-            if ($solicitudesAprobadas > 0): 
-            ?>
-                <span class="ms-auto badge bg-warning"><?php echo $solicitudesAprobadas; ?></span>
-            <?php endif; ?>
-        </a>
-    </li>
-</ul>
-
-
-<div class="sidebar-section-title">Préstamos de Equipos</div>
-<ul class="sidebar-nav">
-    <li class="sidebar-nav-item">
-        <a href="inventario/prestamos-pendientes.php" class="sidebar-nav-link">
-            <i class="bi bi-hourglass-split"></i>
-            <span>Pendientes</span>
-            <?php
-            $sqlPrestamosPendientes = "SELECT COUNT(*) as total FROM prestamos WHERE estado = 'pendiente'";
-            $prestamosPendientes = obtenerUno($sqlPrestamosPendientes);
-            if ($prestamosPendientes && $prestamosPendientes['total'] > 0):
-            ?>
-                <span class="ms-auto badge bg-warning"><?php echo $prestamosPendientes['total']; ?></span>
-            <?php endif; ?>
-        </a>
-    </li>
-    <li class="sidebar-nav-item">
-        <a href="inventario/prestamos-aprobados.php" class="sidebar-nav-link">
-            <i class="bi bi-check-circle"></i>
-            <span>Aprobados (Asignar)</span>
-            <?php
-            $sqlPrestamosAprobados = "SELECT COUNT(*) as total FROM prestamos WHERE estado = 'aprobado'";
-            $prestamosAprobados = obtenerUno($sqlPrestamosAprobados);
-            if ($prestamosAprobados && $prestamosAprobados['total'] > 0):
-            ?>
-                <span class="ms-auto badge bg-info"><?php echo $prestamosAprobados['total']; ?></span>
-            <?php endif; ?>
-        </a>
-    </li>
-    <li class="sidebar-nav-item">
-        <a href="inventario/prestamos-activos.php" class="sidebar-nav-link">
-            <i class="bi bi-box-seam"></i>
-            <span>Activos</span>
-        </a>
-    </li>
-</ul>
-
-<div class="sidebar-section-title">Administración</div>
-<ul class="sidebar-nav">
-    <li class="sidebar-nav-item">
-        <a href="usuarios/gestionar-usuarios.php" class="sidebar-nav-link">
-            <i class="bi bi-people-fill"></i>
-            <span>Gestionar Usuarios</span>
-        </a>
-    </li>
 </ul>
         <div class="sidebar-section-title">Archivo</div>
         <ul class="sidebar-nav">
@@ -292,8 +215,8 @@ $misTicketsComoTecnico = obtenerTodos($sqlMisTickets, [$_SESSION['user_id']]);
     <div class="main-content">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">🛠️ Dashboard Soporte Técnico</h1>
-            <p class="page-subtitle">Gestiona tickets de soporte técnico y asigna técnicos del equipo</p>
+            <h1 class="page-title">💻 Dashboard Desarrollo</h1>
+            <p class="page-subtitle">Gestiona tickets de desarrollo y asigna técnicos del equipo</p>
         </div>
 
         <!-- Stats Cards -->
