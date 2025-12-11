@@ -158,8 +158,8 @@ $categorias = obtenerTodos("SELECT * FROM categories WHERE activo = 1 ORDER BY n
         </a>
     </li>
 </ul>
-<!-- SI EL USUARIO ES JEFE, AGREGAR ESTA SECCIÓN -->
-<?php if (esJefe()): ?>
+<!-- SI EL USUARIO ES JEFE O USUARIO AUTORIZADO ESPECIAL -->
+<?php if (esJefe() || esUsuarioAutorizadoEspecial()): ?>
 <div class="sidebar-section-title">Gestión de Equipo</div>
 <ul class="sidebar-nav">
     <li class="sidebar-nav-item">
